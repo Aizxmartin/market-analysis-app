@@ -1,0 +1,1 @@
+# Market Analysis App\n\nUpload MLS data and generate a branded .docx market valuation report with Streamlit.
