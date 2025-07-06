@@ -56,4 +56,5 @@ def generate_report(subject_info, comps, est_ppsf, notes, zillow_val, redfin_val
         )
 
     if pdf_text:
-        doc.add_heading('Subject Prop_
+    doc.add_heading('Subject Property Details (from PDF)', level=1)
+    doc.add_paragraph(pdf_text)    
