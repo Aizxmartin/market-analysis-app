@@ -57,4 +57,56 @@ def generate_report(subject_info, comps, est_ppsf, notes, zillow_val, redfin_val
 
     if pdf_text:
         doc.add_heading('Subject Property Details (from PDF)', level=1)
-        doc.add_paragraph(pdf_text)   
+        doc.add_paragraph(pdf_text) 
+        
+    return doc
+
+def main():
+    st.title("Market Analysis Report Generator")
+
+    st.write("Upload your MLS data (CSV) and Subject Property PDF:")
+
+    csv_file = st.file_uploader("Upload CSV file", type=["csv"])
+    pdf_file = st.file_uploader("Upload Subject Property PDF", type=["pdf"])
+
+    # Gather user inputs
+    subject_address = st.text_input("Subject Property Address")
+    subject_sqft = st.number_input("Subject Property SqFt", min_value=0, step=1)
+    subject_beds = st.number_input("Bedrooms", min_value=0, step=1)
+    subject_baths = st.number_input("Bathrooms", min_value=0, step=1)
+    subject_price = st.number_input("Closed Price", min_value=0, step=1)
+
+    zillow_val = st.text_input("Zillow Estimate")
+    redfin_val = st.text_input("Redfin Estimate")
+    notes = st.text_area("Notes and Special Features")
+
+    if st.button("Generate Report"):
+        if csv_file and pdf_file:
+            df = pd.read_csv(csv_file)
+            comps, avg_ppsf = analyze_market(df)
+            pdf_text = extract_pdf_text(pdf_file)
+
+            subject_info = {
+                "address": subject_address,
+                "sqft": subject_sqft,
+                "beds": subject_beds,
+                "baths": subject_baths,
+                "price": subject_price
+            }
+
+            # Generate Word doc
+            doc = generate_report(subject_info, comps, avg_ppsf, notes, zillow_val, redfin_val, pdf_text)
+
+            # Save to temp file and download
+            tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
+            doc.save(tmp.name)
+
+            with open(tmp.name, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode()
+                href = f'<a href="data:application/octet-stream;base64,{b64}" download="market_report.docx">Download Report</a>'
+                st.markdown(href, unsafe_allow_html=True)
+        else:
+            st.error("Please upload both CSV and PDF files.")
+
+if __name__ == "__main__":
+    main()
