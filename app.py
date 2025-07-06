@@ -88,3 +88,68 @@ def generate_report(subject_info, comps, est_ppsf, notes, zillow_val, redfin_val
     doc.save(temp_file.name)
     return temp_file.name
 
+st.title("📊 Cloud Market Valuation Tool")
+st.write("Upload MLS data, enter subject details, and generate a branded market report.")
+
+uploaded_csv = st.file_uploader("Upload MLS CSV/XLSX File", type=["csv", "xlsx"])
+uploaded_pdf = st.file_uploader("Upload Subject Property PDF (optional)", type=["pdf"])
+
+if uploaded_csv:
+    # Load CSV or XLSX
+    if uploaded_csv.name.endswith(".csv"):
+        df = pd.read_csv(uploaded_csv)
+    else:
+        df = pd.read_excel(uploaded_csv)
+
+    # Normalize columns
+    df.columns = [col.strip().lower() for col in df.columns]
+
+    # Build Address column from parts
+    df["address"] = (
+        df["street number"].astype(str).str.strip()
+        + " "
+        + df["street dir prefix"].fillna("").str.strip() + " "
+        + df["street name"].str.strip() + " "
+        + df["street dir suffix"].fillna("").str.strip()
+    ).str.replace("  ", " ").str.strip()
+
+    st.write("Columns detected:", df.columns.tolist())
+
+    comps, avg_ppsf = analyze_market(df)
+
+    st.write("Preview of Comparable Properties with Net Prices:")
+    st.dataframe(comps[["address", "NetPrice", "PricePerSF", "above grade finished area", "bedrooms total", "bathrooms total integer"]])
+
+    st.subheader("Enter Subject Property Details")
+
+    subject_address = st.text_input("Subject Property Address")
+    subject_sqft = st.number_input("Above Grade Finished Area (SqFt)", min_value=0)
+    subject_beds = st.number_input("Bedrooms", min_value=0, step=1)
+    subject_baths = st.number_input("Bathrooms", min_value=0, step=1)
+    subject_price = st.number_input("Close Price", min_value=0)
+
+    notes = st.text_area("Notes and Special Features")
+    zillow_val = st.text_input("Zillow Zestimate")
+    redfin_val = st.text_input("Redfin Estimate")
+
+    if st.button("Generate Report"):
+        subject_info = {
+            "address": subject_address,
+            "sqft": subject_sqft,
+            "beds": subject_beds,
+            "baths": subject_baths,
+            "price": subject_price
+        }
+
+        pdf_text = ""
+        if uploaded_pdf:
+            pdf_text = extract_pdf_text(uploaded_pdf)
+
+        report_path = generate_report(subject_info, comps, avg_ppsf, notes, zillow_val, redfin_val, pdf_text)
+
+        with open(report_path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+            href = f'<a href="data:application/octet-stream;base64,{b64}" download="Market_Valuation_Report.docx">📄 Download Report</a>'
+            st.markdown(href, unsafe_allow_html=True)
+
+
