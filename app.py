@@ -7,11 +7,18 @@ import base64
 import fitz  # PyMuPDF
 
 def analyze_market(df, subject_address):
+    # Use lowercase column names consistently
     comps = df[df['address'] != subject_address].copy()
     subject = df[df['address'] == subject_address].iloc[0]
-    comps['PricePerSF'] = comps['price'] / comps['sqft']
+
+    # Specify your MLS export column names
+    PRICE_COLUMN = 'close price'
+    SQFT_COLUMN = 'above grade finished area'
+
+    comps['PricePerSF'] = comps[PRICE_COLUMN] / comps[SQFT_COLUMN]
     avg_ppsf = comps['PricePerSF'].mean()
-    est_subject_price = avg_ppsf * subject['sqft']
+    est_subject_price = avg_ppsf * subject[SQFT_COLUMN]
+
     return subject, comps, est_subject_price
 
 def extract_pdf_text(pdf_file):
