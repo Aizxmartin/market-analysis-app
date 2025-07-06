@@ -7,11 +7,11 @@ import base64
 import fitz  # PyMuPDF
 
 def analyze_market(df, subject_address):
-    comps = df[df['Address'] != subject_address].copy()
-    subject = df[df['Address'] == subject_address].iloc[0]
-    comps['PricePerSF'] = comps['Price'] / comps['SqFt']
+    comps = df[df['address'] != subject_address].copy()
+    subject = df[df['address'] == subject_address].iloc[0]
+    comps['PricePerSF'] = comps['price'] / comps['sqft']
     avg_ppsf = comps['PricePerSF'].mean()
-    est_subject_price = avg_ppsf * subject['SqFt']
+    est_subject_price = avg_ppsf * subject['sqft']
     return subject, comps, est_subject_price
 
 def extract_pdf_text(pdf_file):
