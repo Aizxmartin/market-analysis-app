@@ -15,7 +15,7 @@ def analyze_market(df, subject_address):
     return subject, comps, est_subject_price
 
 def extract_pdf_text(pdf_file):
-    doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
+    doc = fitz.open(stream=pdf_file.read(), filetype="pdf")    
     all_text = []
     for page_num, page in enumerate(doc, start=1):
         text = page.get_text()
