@@ -16,13 +16,17 @@ def analyze_market(df):
 
     comps = df.copy()
 
-    # Fill missing concessions
-    comps["concessions"] = comps["concessions"].fillna(0)
+    # Convert close price and concessions to numeric
+    comps["close price"] = pd.to_numeric(comps["close price"], errors="coerce")
+    comps["concessions"] = pd.to_numeric(comps["concessions"], errors="coerce").fillna(0)
+
+    # Remove comps without valid close price
+    comps = comps[comps["close price"].notna()]
 
     # Remove comps without valid square footage
     comps = comps[comps["above grade finished area"] > 0]
     if comps.empty:
-        st.error("No comps have valid square footage.")
+        st.error("No comps have valid close price and square footage.")
         st.stop()
 
     # Compute net price
