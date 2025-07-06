@@ -73,16 +73,18 @@ def generate_report(subject_info, comps, est_ppsf, notes, zillow_val, redfin_val
             f"{row['address']}: Net ${row['NetPrice']:,.0f} | {row['above grade finished area']} SqFt | {row['bedrooms total']} Bd / {row['bathrooms total integer']} Ba | PPSF ${row['PricePerSF']:,.2f}",
             style='List Bullet'
         )
-if pdf_text:
-    doc.add_heading('Subject Property Details (from PDF)', level=1)
-    doc.add_paragraph(pdf_text)
 
-doc.add_paragraph("\n---\n")
-doc.add_paragraph(
-    "This is an estimate based on MLS market information and publicly available data. "
-    "It is intended for marketing and informational purposes only and does not constitute an appraisal or guarantee of market value."
-)
+    if pdf_text:
+        doc.add_heading('Subject Property Details (from PDF)', level=1)
+        doc.add_paragraph(pdf_text)
 
-temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
-doc.save(temp_file.name)
-return temp_file.name
+    doc.add_paragraph("\n---\n")
+    doc.add_paragraph(
+        "This is an estimate based on MLS market information and publicly available data. "
+        "It is intended for marketing and informational purposes only and does not constitute an appraisal or guarantee of market value."
+    )
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
+    doc.save(temp_file.name)
+    return temp_file.name
+
