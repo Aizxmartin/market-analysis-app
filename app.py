@@ -73,8 +73,7 @@ def generate_report(subject_info, comps, est_ppsf, notes, zillow_val, redfin_val
             f"{row['address']}: Net ${row['NetPrice']:,.0f} | {row['above grade finished area']} SqFt | {row['bedrooms total']} Bd / {row['bathrooms total integer']} Ba | PPSF ${row['PricePerSF']:,.2f}",
             style='List Bullet'
         )
-
-    if pdf_text:
+if pdf_text:
     doc.add_heading('Subject Property Details (from PDF)', level=1)
     doc.add_paragraph(pdf_text)
 
